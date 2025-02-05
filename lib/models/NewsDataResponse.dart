@@ -3,12 +3,16 @@ import 'package:news_c13/models/source_response.dart';
 class NewsDataResponse {
   NewsDataResponse({
     this.status,
+    this.code,
+    this.message,
     this.totalResults,
     this.articles,
   });
 
   NewsDataResponse.fromJson(dynamic json) {
     status = json['status'];
+    code = json['code'];
+    message = json['message'];
     totalResults = json['totalResults'];
     if (json['articles'] != null) {
       articles = [];
@@ -19,6 +23,8 @@ class NewsDataResponse {
   }
 
   String? status;
+  String? code;
+  String? message;
   int? totalResults;
   List<Articles>? articles;
 }
@@ -55,4 +61,3 @@ class Articles {
   String? publishedAt;
   String? content;
 }
-

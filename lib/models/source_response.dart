@@ -1,11 +1,20 @@
 class SourceResponse {
   String? status;
+  String? code;
+  String? message;
   List<Sources>? sources;
 
-  SourceResponse({this.status, this.sources});
+  SourceResponse({
+    this.status,
+    this.sources,
+    this.code,
+    this.message,
+  });
 
   SourceResponse.fromJson(Map<String, dynamic> json) {
     status = json['status'];
+    code = json['code'];
+    message = json['message'];
     if (json['sources'] != null) {
       sources = <Sources>[];
       json['sources'].forEach((v) {

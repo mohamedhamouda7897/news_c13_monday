@@ -1,75 +1,99 @@
 import 'package:flutter/material.dart';
-import 'package:news_c13/api_manager.dart';
-import 'package:news_c13/models/NewsDataResponse.dart';
-import 'package:news_c13/models/source_response.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:news_c13/bloc/cubit.dart';
+import 'package:news_c13/bloc/states.dart';
 import 'package:news_c13/news_item.dart';
+import 'package:news_c13/repository/home_repo_local_impl.dart';
+import 'package:news_c13/repository/home_repo_remote_impl.dart';
 
-class SourcesSection extends StatefulWidget {
-  SourcesSection({super.key});
+class SourcesSection extends StatelessWidget {
+  String catId;
+  Function onTap;
 
-  @override
-  State<SourcesSection> createState() => _SourcesSectionState();
-}
+  SourcesSection({required this.catId, required this.onTap, super.key});
 
-class _SourcesSectionState extends State<SourcesSection> {
-  int selectedIndex = 0;
+  bool hasInternet = true;
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<SourceResponse>(
-      future: ApiManager.getSources(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text("Error : ${snapshot.error}"));
-        } else {
-          List<Sources> data = snapshot.data?.sources ?? [];
-          return Column(
-            children: [
-              DefaultTabController(
-                  length: data.length,
-                  initialIndex: selectedIndex,
-                  child: TabBar(
-                      onTap: (value) {
-                        selectedIndex = value;
-                        setState(() {});
+    return BlocProvider(
+      create: (context) => HomeCubit(
+          homeRepo: hasInternet ? HomeRepoRemoteImpl() : HomeRepoLocalImpl())
+        ..getSources(catId),
+      child: BlocConsumer<HomeCubit, HomeStates>(
+        listener: (context, state) {
+          if (state is GetNewsDataErrorState) {
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: Text("Error"),
+                content: Text(state.error),
+                actions: [
+                  ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
                       },
-                      dividerColor: Colors.transparent,
-                      indicatorColor: Color(0xFF171717),
-                      labelColor: Color(0xFF171717),
-                      isScrollable: true,
-                      tabs: data
-                          .map((element) => Tab(
-                                text: element.name,
-                              ))
-                          .toList())),
-              Expanded(
-                  child: FutureBuilder<NewsDataResponse>(
-                future: ApiManager.getNewsData(data[selectedIndex].id ?? ""),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text("Error : ${snapshot.error}"));
-                  } else {
-                    var data = snapshot.data?.articles ?? [];
-
-                    return ListView.builder(
-                      itemBuilder: (context, index) {
-                        return NewsItem(
-                          article: data[index],
-                        );
+                      child: Text("Ok"))
+                ],
+              ),
+            );
+          } else if (state is GetSourcesErrorState) {
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: Text("Error"),
+                content: Text(state.error),
+                actions: [
+                  ElevatedButton(
+                      onPressed: () {
+                        onTap();
                       },
-                      itemCount: data.length,
+                      child: Text("Ok"))
+                ],
+              ),
+            );
+          }
+        },
+        builder: (context, state) {
+          var list = HomeCubit.get(context).sourceResponse?.sources ?? [];
+          var articles =
+              HomeCubit.get(context).newsDataResponse?.articles ?? [];
+          if (state is GetSourcesLoadingState ||
+              state is GetNewsDataLoadingState) {
+            return Center(child: CircularProgressIndicator());
+          } else {
+            return Column(
+              children: [
+                DefaultTabController(
+                    length: list.length,
+                    initialIndex: HomeCubit.get(context).selectedIndex,
+                    child: TabBar(
+                        onTap: (value) {
+                          HomeCubit.get(context).changeSelectedSource(value);
+                        },
+                        dividerColor: Colors.transparent,
+                        indicatorColor: Color(0xFF171717),
+                        labelColor: Color(0xFF171717),
+                        isScrollable: true,
+                        tabs: list
+                            .map((element) => Tab(
+                                  text: element.name,
+                                ))
+                            .toList())),
+                Expanded(
+                    child: ListView.builder(
+                  itemBuilder: (context, index) {
+                    return NewsItem(
+                      article: articles[index],
                     );
-                  }
-                },
-              ))
-            ],
-          );
-        }
-      },
+                  },
+                  itemCount: articles.length,
+                ))
+              ],
+            );
+          }
+        },
+      ),
     );
   }
 }
