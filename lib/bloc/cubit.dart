@@ -4,7 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_c13/bloc/states.dart';
 import 'package:http/http.dart' as http;
-import 'package:news_c13/models/NewsDataResponse.dart';
+import 'package:news_c13/models/news_data_response.dart';
 import 'package:news_c13/models/source_response.dart';
 import 'package:news_c13/repository/home_repo.dart';
 

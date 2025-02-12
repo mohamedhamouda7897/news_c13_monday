@@ -1,10 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:news_c13/home_screen.dart';
+import 'package:news_c13/internet_service.dart';
+import 'package:news_c13/models/news_data_response.dart';
+import 'package:news_c13/models/source_response.dart';
 import 'package:news_c13/observer.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   Bloc.observer = MyBlocObserver();
+
+  InternetService().init();
+
+  await Hive.initFlutter();
+  Hive.registerAdapter(SourceResponseAdapter());
+  Hive.registerAdapter(SourcesAdapter());
+  Hive.registerAdapter(ArticlesAdapter());
+  Hive.registerAdapter(NewsDataResponseAdapter());
   runApp(const MyApp());
 }
 

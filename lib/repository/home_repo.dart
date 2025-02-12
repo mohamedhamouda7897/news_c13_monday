@@ -1,4 +1,4 @@
-import 'package:news_c13/models/NewsDataResponse.dart';
+import 'package:news_c13/models/news_data_response.dart';
 import 'package:news_c13/models/source_response.dart';
 
 abstract class HomeRepo {
