@@ -12,7 +12,7 @@ class SourcesSection extends StatelessWidget {
 
   SourcesSection({required this.catId, required this.onTap, super.key});
 
-  bool hasInternet = true;
+  bool hasInternet = false;
 
   @override
   Widget build(BuildContext context) {

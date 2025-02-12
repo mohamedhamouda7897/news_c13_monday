@@ -1,6 +1,8 @@
 import 'dart:convert';
 
-import 'package:news_c13/models/NewsDataResponse.dart';
+import 'package:news_c13/cache_helper.dart';
+import 'package:news_c13/models/news_data_response.dart';
+
 import 'package:news_c13/models/source_response.dart';
 import 'package:news_c13/repository/home_repo.dart';
 import 'package:http/http.dart' as http;
@@ -15,6 +17,8 @@ class HomeRepoRemoteImpl implements HomeRepo {
     http.Response response = await http.get(url);
     var json = jsonDecode(response.body);
     NewsDataResponse newsDataResponse = NewsDataResponse.fromJson(json);
+    await HiveService.saveNewsResponse(newsDataResponse);
+    print("News newsDataResponse  Saved on local DB");
     return newsDataResponse;
   }
 
@@ -29,6 +33,8 @@ class HomeRepoRemoteImpl implements HomeRepo {
 
     var json = jsonDecode(response.body);
     SourceResponse sourceResponse = SourceResponse.fromJson(json);
+    await HiveService.saveSourcesResponse(sourceResponse);
+    print("News Sources Saved on local DB");
     return sourceResponse;
   }
 }
